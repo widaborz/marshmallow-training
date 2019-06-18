@@ -1,19 +1,7 @@
 from marshmallow import Schema, fields, pprint, post_load, ValidationError
 
-data = {
-            "subarrayID": 1, 
-            "dish": {
-                "receptorIDList": ["0001", "0002"]
-            }
-        }
-#subarray class definition
-class SubArray(object):
-    def __init__(self, dish, subarrayID):
-        self.dish = dish
-        self.subarrayID = subarrayID
+data = {"subarrayID": 1, "dish": {"receptorIDList": ["0001", "0002"]}}
 
-    def __repr__(self):
-        return 'SubArray {} is composed of receptorIDList {}'.format(self.subarrayID, self.dish)
 
 #dish class definition
 class Dish(object):
@@ -24,7 +12,17 @@ class Dish(object):
         idList = ""
         for receptorId in self.receptorIDList:
             idList = idList + " " + receptorId
-        return 'Dish has {} receptorIDList'.format(idList)
+        return '{}'.format(idList)
+
+#subarray class definition
+class SubArray(object):
+    def __init__(self, subarrayID, dish):
+        self.dish = dish
+        self.subarrayID = subarrayID
+
+    def __repr__(self):
+        return 'SubArray {} is composed of receptorIDList {} '.format(self.subarrayID, self.dish)
+
 
 #create dish and subarray objects
 myDish = Dish(receptorIDList=["0003", "0004"])
@@ -38,9 +36,17 @@ print(mySubArray)
 class DishSchema(Schema): 
     receptorIDList = fields.List(fields.String()) #https://marshmallow.readthedocs.io/en/3.0/api_reference.html
 
+    @post_load
+    def create_Dish(self, data):
+        return Dish(**data)
+
 class SubArraySchema(Schema):
-    dish = fields.String()
-    subarrayID = fields.Nested(DishSchema) #https://marshmallow.readthedocs.io/en/3.0/nesting.html
+    subarrayID = fields.Integer()
+    dish = fields.Nested(DishSchema) #https://marshmallow.readthedocs.io/en/3.0/nesting.html
+
+    @post_load
+    def create_sub_array(self, data):
+        return SubArray(**data)
 
 print("serialization Data/JSON")
 #dump data
@@ -52,4 +58,16 @@ result = dishJson.dump(myDish)
 
 pprint(resultSubArray)
 
+#deserialization
+print("deserialization from Json to Data")
+dish_to_deserialize = {"receptorIDList": ["0001", "0002"]}
 
+#creation dish objet from json
+dishFromJson = DishSchema()
+resultDishFromJson = dishFromJson.load(dish_to_deserialize)
+
+subarrayFromJson = SubArraySchema()
+resultSubArrayFromJson = subarrayFromJson.load(data)
+
+
+pprint(resultSubArrayFromJson)

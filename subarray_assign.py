@@ -23,7 +23,7 @@ class Dish(object):
         return 'Dish has {} receptorIDList'.format(self.receptorIDList)
 
 
-myDish = Dish(receptorIDList='1, 2')
+myDish = Dish(receptorIDList=["0001", "0002"])
 mySubArray = SubArray(1, myDish)
 
 print(myDish)
